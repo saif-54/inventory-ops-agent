@@ -1,3 +1,28 @@
+﻿import os
+import sys
+import logging
+from logging.handlers import RotatingFileHandler
+
+os.makedirs(r"C:\Users\saifh\agent_workspace\logs", exist_ok=True)
+log_path = r"C:\Users\saifh\agent_workspace\logs\scheduler.log"
+
+logger = logging.getLogger("inventory_ops")
+logger.setLevel(logging.INFO)
+if not logger.handlers:
+    handler = RotatingFileHandler(log_path, maxBytes=5_000_000, backupCount=3, encoding="utf-8")
+    handler.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(message)s"))
+    logger.addHandler(handler)
+
+# تحويل كافة مخرجات stdout و stderr مباشرة إلى ملف اللوج
+class LoggerWriter:
+    def __init__(self, level): self.level = level
+    def write(self, message):
+        if message.strip(): self.level(message.strip())
+    def flush(self): pass
+
+sys.stdout = LoggerWriter(logger.info)
+sys.stderr = LoggerWriter(logger.error)
+logger.info("=== Direct Python Run Triggered ===")
 import argparse
 import os
 import sqlite3
