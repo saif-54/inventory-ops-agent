@@ -1,0 +1,30 @@
+﻿# Environment & Secrets
+.env
+.env*
+*.env
+
+# Hermes & Local Configs
+config.yaml
+config.yml
+*.bat
+
+# Logs & Telemetry
+logs/
+*.log
+probe.json
+last_run.json
+
+# Databases & Runtime data
+*.db
+*.sqlite3
+abaya_inventory.db
+
+# Generated Output Documents
+*.pdf
+restock_purchase_order.pdf
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+venv/
+.venv/
