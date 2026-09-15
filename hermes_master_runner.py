@@ -38,6 +38,24 @@ RESTOCK_PDF = "C:/Users/saifh/agent_workspace/restock_purchase_order.pdf"
 WEBHOOK_URL = "https://httpbin.org/post"
 
 
+HEALTHCHECK_URL = "https://hc-ping.com/cf623233-d1b1-4a9d-a8dc-259a2073a84b"
+
+def ping_healthcheck(status: str = ""):
+    """
+    إرسال إشارة للمراقبة الخارجية:
+    - status="": نجاح واكتمال الدورة.
+    - status="/start": بدء التنفيذ لقياس مدة التشغيل.
+    - status="/fail": إشعار فوري بفشل الـ Pipeline.
+    """
+    if "YOUR_ACTUAL_UUID" in HEALTHCHECK_URL:
+        return  # تخطي الإرسال إذا لم يتم وضع الرابط الحقيقي بعد
+
+    target_url = f"{HEALTHCHECK_URL.rstrip('/')}{status}"
+    try:
+        requests.get(target_url, timeout=5)
+    except requests.RequestException as e:
+        # تسجيل تحذير فقط دون كسر تنفيذ السكريبت
+        print(f"[WARN] Healthchecks ping failed ({status}): {e}")
 def run_pipeline(dry_run=False):
     print("\n==================================================")
     print("   HERMES AGENT: INTEGRATED E-COMMERCE PIPELINE   ")
@@ -117,4 +135,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Hermes Agent Operations Runner")
     parser.add_argument("--dry-run", action="store_true", help="Run without sending webhooks")
     args = parser.parse_args()
-    run_pipeline(dry_run=args.dry_run)
+
+    ping_healthcheck("/start")
+    try:
+        run_pipeline(dry_run=args.dry_run)
+        ping_healthcheck()
+    except Exception as err:
+        ping_healthcheck("/fail")
+        raise err
